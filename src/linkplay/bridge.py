@@ -333,10 +333,14 @@ class LinkPlayPlayer:
 
     @property
     def album_art(self) -> str:
-        """Returns the url to the album art."""
-        return self.metainfo.get(MetaInfo.METADATA, {}).get(
+        """Returns the url to the album art, or an empty string if there is none."""
+        album_art = self.metainfo.get(MetaInfo.METADATA, {}).get(
             MetaInfoMetaData.ALBUM_ART, ""
         )
+        # Devices report missing album art as a placeholder such as "unknow"
+        if not album_art.startswith(("http://", "https://")):
+            return ""
+        return album_art
 
     @property
     def volume(self) -> int:

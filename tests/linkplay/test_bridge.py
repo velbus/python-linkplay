@@ -17,6 +17,8 @@ from linkplay.consts import (
     EqualizerMode,
     LinkPlayCommand,
     LoopMode,
+    MetaInfo,
+    MetaInfoMetaData,
     MuteMode,
     PlayerAttribute,
     PlayingMode,
@@ -600,6 +602,31 @@ async def test_meta_info_failed_handling():
 
         # Verify that the mocked function was called with the correct command
         mock_api.assert_called_with("http://1.2.3.4", None, LinkPlayCommand.META_INFO)
+
+
+@pytest.mark.parametrize(
+    ("album_art_uri", "expected"),
+    [
+        ("https://example.com/cover.jpg", "https://example.com/cover.jpg"),
+        ("http://example.com/cover.jpg", "http://example.com/cover.jpg"),
+        ("unknow", ""),
+        ("", ""),
+    ],
+)
+def test_album_art(album_art_uri: str, expected: str):
+    """Test that only http(s) album art urls are returned."""
+    player = LinkPlayPlayer(MagicMock())
+    player.metainfo = {MetaInfo.METADATA: {MetaInfoMetaData.ALBUM_ART: album_art_uri}}
+
+    assert player.album_art == expected
+
+
+def test_album_art_without_metainfo():
+    """Test that the album art is empty when no meta info is available."""
+    player = LinkPlayPlayer(MagicMock())
+    player.metainfo = {}
+
+    assert player.album_art == ""
 
 
 async def test_audio_output_control():
